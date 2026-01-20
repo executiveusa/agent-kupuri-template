@@ -46,7 +46,7 @@ export function CreditsProvider({ children }: { children: ReactNode }) {
         .from("users")
         .select("credits_available")
         .eq("id", user.id)
-        .single();
+        .single() as { data: { credits_available: number } | null; error: Error | null };
 
       if (supabaseError) {
         console.error("Error fetching credits:", supabaseError);
@@ -55,7 +55,7 @@ export function CreditsProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      setCredits((data?.credits_available as number) ?? 0);
+      setCredits(data?.credits_available ?? 0);
     } catch (err) {
       console.error("Error fetching credits:", err);
       setError("Failed to fetch credits");
