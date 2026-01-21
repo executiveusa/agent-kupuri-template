@@ -1,5 +1,8 @@
 import { supabase } from "@/lib/auth/supabase-client";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const db = supabase as any;
+
 type CheckoutSessionParams = {
   priceId: string;
   userId: string;
@@ -57,16 +60,16 @@ export async function getCustomerSubscription(userId: string) {
 export async function addUserCredits(userId: string, creditsToAdd: number) {
   try {
     // Add credits to user's balance
-    const { data: currentUser } = await supabase
+    const { data: currentUser } = await db
       .from("users")
       .select("credits_available")
       .eq("id", userId)
       .single();
 
-    const currentCredits = (currentUser?.credits_available as number) || 0;
+    const currentCredits = currentUser?.credits_available || 0;
     const newCredits = currentCredits + creditsToAdd;
 
-    const { error } = await supabase
+    const { error } = await db
       .from("users")
       .update({
         credits_available: newCredits,
@@ -89,7 +92,7 @@ export async function deductUserCredits(
 ) {
   try {
     // Deduct credits from user's balance
-    const { data: currentUser, error: fetchError } = await supabase
+    const { data: currentUser, error: fetchError } = await db
       .from("users")
       .select("credits_available")
       .eq("id", userId)
@@ -97,14 +100,14 @@ export async function deductUserCredits(
 
     if (fetchError) throw fetchError;
 
-    const currentBalance = (currentUser?.credits_available as number) || 0;
+    const currentBalance = currentUser?.credits_available || 0;
     if (currentBalance < creditsToDeduct) {
       throw new Error("Insufficient credits");
     }
 
     const newCredits = currentBalance - creditsToDeduct;
 
-    const { error } = await supabase
+    const { error } = await db
       .from("users")
       .update({
         credits_available: newCredits,
